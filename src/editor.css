@@ -1,0 +1,85 @@
+.editor-container {
+  margin: 20px auto 20px auto;
+  border-radius: 2px;
+  max-width: 600px;
+  color: #000;
+  position: relative;
+  line-height: 20px;
+  font-weight: 400;
+  text-align: left;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+
+.editor-text-bold {
+  font-weight: bold;
+}
+
+.editor-text-italic {
+  font-style: italic;
+}
+
+.editor-text-underline {
+  text-decoration: underline;
+}
+
+.editor-paragraph {
+  margin: 0;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.editor-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+/* 
+ In fixed table layout, the overall width is determined by the greater of two values: the width property of the table element and the sum of the widths of the columns
+ Since I set the width of the columns based on the number of children, the width property effectively serves as a minimum width for the table. Having a width property on 
+ table element is necessary for fixed-table layout
+*/
+.editor-table {
+  width: 100px;
+  table-layout: fixed;
+}
+
+/* First line selects a th element that is the first child AND the nth-last-child, which is only true if there are n total siblings, i.e. n columns */
+/* Second line selects every th AFTER the first child with n siblings. In other words it selects the rest of the siblings */
+
+th:first-child:nth-last-child(2),
+th:first-child:nth-last-child(2) ~ th {
+  width: 200px;
+}
+
+th:first-child:nth-last-child(3),
+th:first-child:nth-last-child(3) ~ th {
+  width: 80px;
+}
+
+th:first-child:nth-last-child(4),
+th:first-child:nth-last-child(4) ~ th {
+  width: 50px;
+}
+
+th {
+  width: 20px;
+}
+
+.editor-tablecell-head {
+  font-weight: normal;
+}
+
+.editor-tablecell {
+  text-align: center;
+}
+
+.editor-tablecell p {
+  margin-left: 0.125rem;
+  margin-right: 0.125rem;
+}
+
+.editor-table,
+.editor-tablecell {
+  border: 1px solid rgb(156, 156, 156);
+  border-collapse: collapse;
+}
