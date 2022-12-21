@@ -6,7 +6,6 @@ import { TableNode, TableCellNode, TableRowNode } from "@lexical/table"
 import { ListItemNode, ListNode } from "@lexical/list"
 import { HeadingNode, QuoteNode } from "@lexical/rich-text"
 import { Grid, Paper, makeStyles } from "@material-ui/core"
-import TreeViewPlugin from "./plugins/TreeViewPlugin"
 import ToolbarV7Plugin from "./Toolbar"
 import TableActionMenuPluginRefactor from "./plugins/TableActionMenuPluginRefactor"
 import {
@@ -69,6 +68,7 @@ const EditorV8 = () => {
         <Grid item>
           <Paper className={paperClasses.root}>
             <RichTextPlugin
+              // latest version of lexical requires error boundary prop
               contentEditable={
                 <ContentEditable className={inputClasses.root} />
               }
@@ -81,7 +81,6 @@ const EditorV8 = () => {
           </Paper>
         </Grid>
       </Grid>
-      <TreeViewPlugin />
     </LexicalComposer>
   )
 }

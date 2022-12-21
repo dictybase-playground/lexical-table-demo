@@ -30,11 +30,10 @@ type TableMenuButtonProperties = {
 
 const TableMenuButton = ({ anchorElement }: TableMenuButtonProperties) => {
   const [isOpen, setIsOpen] = useState(false)
-  const { root } = useTableMenuButtonStyles()
   const menuButtonRef = useRef<HTMLButtonElement>(null)
+  const { root } = useTableMenuButtonStyles()
 
   useEffect(() => {
-    // When resizing the viewport, the button can become misplaced
     const menuButtonDOM = menuButtonRef.current
 
     if (!menuButtonDOM) return
@@ -89,6 +88,7 @@ const TableMenuButton = ({ anchorElement }: TableMenuButtonProperties) => {
 
 const TableActionMenuPlugin = () => {
   const [editor] = useLexicalComposerContext()
+  // switch to using atom for this later
   const [currentTableCellDOM, setCurrentTableCellDOM] =
     useState<HTMLElement | null>(null)
 
@@ -96,7 +96,6 @@ const TableActionMenuPlugin = () => {
     // register a listener for selection command,
     // if the selection is inside a table cell, get the current DOM element for that cell
     // and store it in state, which is used by TableMenuButton for positioning
-    // switch to using atom for this later
     return editor.registerCommand(
       // lexical's demo uses registerUpdateListener, maybe that's the right choice, look into later
       SELECTION_CHANGE_COMMAND,
