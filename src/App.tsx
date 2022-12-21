@@ -6,7 +6,9 @@ import { TableNode, TableCellNode, TableRowNode } from "@lexical/table"
 import { ListItemNode, ListNode } from "@lexical/list"
 import { HeadingNode, QuoteNode } from "@lexical/rich-text"
 import { Grid, Paper, makeStyles } from "@material-ui/core"
+import TreeViewPlugin from "./plugins/TreeViewPlugin"
 import ToolbarV7Plugin from "./Toolbar"
+import TableActionMenuPluginRefactor from "./plugins/TableActionMenuPluginRefactor"
 import {
   useEditorInputStyles,
   useEditorPlaceholderStyles,
@@ -59,6 +61,7 @@ const EditorV8 = () => {
   return (
     <LexicalComposer initialConfig={initialConfig}>
       <TablePlugin />
+      <TableActionMenuPluginRefactor />
       <Grid container direction="column">
         <Grid item>
           <ToolbarV7Plugin />
@@ -78,6 +81,7 @@ const EditorV8 = () => {
           </Paper>
         </Grid>
       </Grid>
+      <TreeViewPlugin />
     </LexicalComposer>
   )
 }
