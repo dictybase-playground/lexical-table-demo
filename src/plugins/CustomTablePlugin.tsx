@@ -10,13 +10,12 @@ import {
   TableNode,
   TableCellNode,
   TableRowNode,
-  INSERT_TABLE_COMMAND,
   $isTableNode,
-  $createTableNodeWithDimensions,
   $createTableRowNode,
   $createTableCellNode,
   TableCellHeaderStates,
   applyTableHandlers,
+  HTMLTableElementWithWithTableSelectionState,
 } from "@lexical/table"
 import {
   $getSelection,
@@ -51,14 +50,15 @@ function $createCustomTableNodeWithDimensions(
     const tableRowNode = $createTableRowNode()
 
     for (let c = 0; c < columnCount; c++) {
+      // When inserting a new table cell, the headerStates are used to check whether the cell
+      // should also be a header cell (tr). If a new cell is inserted above or below a cell with
+      // TableCellHeaderState.COLUMN, the new cell will also have TableCellHeaderState.COLUMN.
+      // If the cell is inserted to the left or right of a cell with TableCellHeaderState.ROW,
+      // the new cell will also have TableCellHeaderState.ROW
+
       let headerState =
         r === 0 ? TableCellHeaderStates.ROW : TableCellHeaderStates.NO_STATUS
 
-      // What are the headerStates for? When inserting a new table cell, the headerStates are used
-      // to check whether the cell should also be a header cell (tr). If the cell is inserted above or below
-      // a cell with TableCellHeaderState.COLUMN, the new cell will also have TableCellHeaderState.COLUMN.
-      // If the cell is inserted to the left or right of a cell with TableCellHeaderState.ROW,
-      //  the new cell will also have TableCellHeaderState.ROW
       const tableCellNode = $createTableCellNode(headerState)
       const paragraphNode = $createParagraphNode()
       paragraphNode.append($createTextNode())
@@ -97,15 +97,13 @@ const TablePlugin = () => {
 
         if (!focusNode) return true
 
-        // This function needs to be rewritten to use my CustomTableNode
         const tableNode = $createCustomTableNodeWithDimensions(
           Number(rows),
           Number(columns),
           width,
         )
 
-        // what is a shadow root??
-        // from lexical/nodes/ElementNode:
+        // From lexical/Lexical.dev.js line 8015, under ElementNode:
         // A shadow root is a Node that behaves like RootNode. The shadow root (and RootNode) mark the
         // end of the hiercharchy, most implementations should treat it as if there's nothing (upwards)
         // beyond this point. For example, node.getTopLevelElement(), when performed inside a TableCellNode
@@ -114,7 +112,6 @@ const TablePlugin = () => {
         if ($isRootOrShadowRoot(focusNode)) {
           const target = focusNode.getChildAtIndex(focus.offset)
           target ? target.insertBefore(tableNode) : focusNode.append(tableNode)
-          //   Why insert a paragraph node before the tablenode?????
           tableNode.insertBefore($createParagraphNode())
         } else {
           const topLevelNode = focusNode.getTopLevelElementOrThrow()
@@ -122,6 +119,7 @@ const TablePlugin = () => {
         }
 
         tableNode.insertAfter($createParagraphNode())
+
         const firstCell = tableNode
           .getFirstChildOrThrow()
           .getFirstChildOrThrow()
@@ -136,10 +134,11 @@ const TablePlugin = () => {
   useEffect(() => {
     const tableSelections = new Map()
 
-    // I think this needs to be defined here because the functions it uses needs to be under a lexical context
     const initializeTableNode = (tableNode: TableNode) => {
       const nodeKey = tableNode.getKey()
-      const tableElement = editor.getElementByKey(nodeKey)
+      const tableElement = editor.getElementByKey(
+        nodeKey,
+      ) as HTMLTableElementWithWithTableSelectionState
 
       if (tableElement && !tableSelections.has(nodeKey)) {
         const tableSelection = applyTableHandlers(
@@ -173,10 +172,12 @@ const TablePlugin = () => {
                 initializeTableNode(tableNode)
               }
             })
-          } else if (mutation === "destroyed") {
+          }
+
+          if (mutation === "destroyed") {
             const tableSelection = tableSelections.get(nodeKey)
 
-            if (tableSelection !== undefined) {
+            if (tableSelection) {
               tableSelection.removeListeners()
               tableSelections.delete(nodeKey)
             }
