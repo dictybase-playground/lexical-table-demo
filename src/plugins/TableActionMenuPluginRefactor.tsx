@@ -60,8 +60,8 @@ const TableMenuButton = ({ anchorElement }: TableMenuButtonProperties) => {
       </IconButton>
       <Menu
         open={isOpen}
+        // getContentAnchorEl needs to be set to null for anchorOrigin.vertical to have affect
         getContentAnchorEl={null}
-        // This needs to be set to null for anchorOrigin.vertical to have affect
         anchorEl={menuButtonRef.current}
         anchorOrigin={{
           vertical: "top",
