@@ -29,9 +29,8 @@ import {
   createCommand,
 } from "lexical"
 import { useEffect } from "react"
-import CustomTableNode, {
-  $createCustomTableNode,
-} from "../nodes/CustomTableNode"
+import { pipe, F } from "@mobily/ts-belt"
+import CustomTableNode from "../nodes/CustomTableNode"
 
 export const INSERT_CUSTOM_TABLE_COMMAND = createCommand<{
   columns: string
@@ -39,35 +38,51 @@ export const INSERT_CUSTOM_TABLE_COMMAND = createCommand<{
   width: number
 }>()
 
+const createRows = (rows: number) =>
+  [...new Array(rows)].map(() => $createTableRowNode())
+
+const createParagraphWithTextNode = () =>
+  pipe(
+    $createParagraphNode(),
+    F.tap((p) => p.append($createTextNode())),
+  )
+
+const createCell = () =>
+  pipe(
+    $createTableCellNode(TableCellHeaderStates.NO_STATUS),
+    F.tap((c) => c.append(createParagraphWithTextNode())),
+  )
+
+const createCellArray = (cells: number) =>
+  [...new Array(cells)].map(() => createCell())
+
+const cellsToAppend = (cells: number) => (row: TableRowNode) => {
+  createCellArray(cells).forEach((c) => {
+    row.append(c)
+  })
+}
+
+const appendRows = (table: TableNode, rowArray: TableRowNode[]) => {
+  rowArray.forEach((r) => table.append(r))
+  return table
+}
+
 function $createCustomTableNodeWithDimensions(
   rowCount: number,
   columnCount: number,
   width: number,
 ) {
-  const tableNode = $createCustomTableNode(width)
+  const tableNode = new CustomTableNode(width)
 
-  for (let r = 0; r < rowCount; r++) {
-    const tableRowNode = $createTableRowNode()
+  const appendCells = cellsToAppend(columnCount)
 
-    for (let c = 0; c < columnCount; c++) {
-      // When inserting a new table cell, the headerStates are used to check whether the cell
-      // should also be a header cell (tr). If a new cell is inserted above or below a cell with
-      // TableCellHeaderState.COLUMN, the new cell will also have TableCellHeaderState.COLUMN.
-      // If the cell is inserted to the left or right of a cell with TableCellHeaderState.ROW,
-      // the new cell will also have TableCellHeaderState.ROW
-
-      let headerState =
-        r === 0 ? TableCellHeaderStates.ROW : TableCellHeaderStates.NO_STATUS
-
-      const tableCellNode = $createTableCellNode(headerState)
-      const paragraphNode = $createParagraphNode()
-      paragraphNode.append($createTextNode())
-      tableCellNode.append(paragraphNode)
-      tableRowNode.append(tableCellNode)
-    }
-
-    tableNode.append(tableRowNode)
+  const populateRows = (rows: TableRowNode[]) => {
+    rows.forEach((r) => appendCells(r))
+    return rows
   }
+
+  const rows = pipe(rowCount, createRows, populateRows)
+  appendRows(tableNode, rows)
 
   return tableNode
 }

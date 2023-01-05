@@ -13,9 +13,7 @@ import { useSetAtom } from "jotai"
 import { dialogOpenAtom } from "./state"
 import { INSERT_CUSTOM_TABLE_COMMAND } from "./plugins/CustomTablePlugin"
 
-const calculateWidth = (columns: number) => {
-  return Math.log(columns) * 500
-}
+const calculateWidth = (columns: number) => Math.log(columns) * 500
 
 const TableDialogContents = () => {
   const setIsDialogOpen = useSetAtom(dialogOpenAtom)
@@ -35,7 +33,7 @@ const TableDialogContents = () => {
     editor.dispatchCommand(INSERT_CUSTOM_TABLE_COMMAND, {
       rows,
       columns,
-      width: calculateWidth(parseInt(columns)),
+      width: calculateWidth(Number.parseInt(columns)),
     })
     setIsDialogOpen(false)
   }

@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext"
 import {
   $deleteTableColumn,
@@ -25,7 +26,7 @@ import {
 import { ReactPortal, useCallback, useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 
-type TableCellActionMenuProps = Readonly<{
+type TableCellActionMenuProperties = Readonly<{
   contextRef: { current: null | HTMLElement }
   onClose: () => void
   setIsMenuOpen: (isOpen: boolean) => void
@@ -37,7 +38,7 @@ function TableActionMenu({
   tableCellNode: _tableCellNode,
   setIsMenuOpen,
   contextRef,
-}: TableCellActionMenuProps) {
+}: TableCellActionMenuProperties) {
   const [editor] = useLexicalComposerContext()
   const dropDownRef = useRef<HTMLDivElement | null>(null)
   const [tableCellNode, updateTableCellNode] = useState(_tableCellNode)
