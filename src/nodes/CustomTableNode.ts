@@ -2,8 +2,6 @@ import { TableNode } from "@lexical/table"
 import { addClassNamesToElement } from "@lexical/utils"
 import { NodeKey, EditorConfig } from "lexical"
 
-// should this type error just be ignored?
-// it's complaining that the type of getType() should be the string "table" not a string in general
 class CustomTableNode extends TableNode {
   static getType(): "table" {
     return "table"
@@ -15,6 +13,15 @@ class CustomTableNode extends TableNode {
 
   constructor(width: number, key?: NodeKey) {
     super(key)
+    /*
+     Note about double underscore naming from Lexical's documentation: 
+     
+     "By convention, we prefix properties with __ (double underscore) so that it makes it clear that these
+     properties are private and their access should be avoided directly. We opted for __ instead of _ 
+     because of the fact that some build tooling mangles and minifies single _ prefixed properties to improve
+     code size. However, this breaks down if you're exposing a node to be extended outside of your build."
+     
+    */
     this.__width = width
   }
 
@@ -26,18 +33,4 @@ class CustomTableNode extends TableNode {
   }
 }
 
-export const $createCustomTableNode = (width: number): CustomTableNode =>
-  new CustomTableNode(width)
-
 export default CustomTableNode
-
-// 1. Create Custom Table Node with __width property
-// 2. Override default TableNode with CustomTableNode, this will "replace
-//    all instances" of TableNode with CustomTableNode
-//    Not really sure if overriding is the right move in this case?
-// 3. If I add a new parameter for width to the CustomTableNode's constructor, I would
-//    have rewrite TablePlugin to provide an argument, I think.
-//
-//  CustomTableNode doesn't know in advance how many columns it will have
-//  so we have to make that calculation in the dispatch, based on the number of
-//  columns. But what about

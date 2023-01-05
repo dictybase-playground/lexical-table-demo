@@ -32,6 +32,7 @@
     }
   },
   "rules": {
+    "no-underscore-dangle": "off",
     "import/no-unresolved": "error",
     "quotes": ["off", "single"],
     "semi": ["error", "never"],
