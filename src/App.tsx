@@ -1,18 +1,20 @@
 import { LexicalComposer } from "@lexical/react/LexicalComposer"
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin"
-import { TablePlugin } from "@lexical/react/LexicalTablePlugin"
 import { ContentEditable } from "@lexical/react/LexicalContentEditable"
-import { TableNode, TableCellNode, TableRowNode } from "@lexical/table"
+import { TableCellNode, TableRowNode } from "@lexical/table"
 import { ListItemNode, ListNode } from "@lexical/list"
 import { HeadingNode, QuoteNode } from "@lexical/rich-text"
 import { Grid, Paper, makeStyles } from "@material-ui/core"
+import CustomTableNode from "./nodes/CustomTableNode"
 import ToolbarV7Plugin from "./Toolbar"
 import TableActionMenuPluginRefactor from "./plugins/TableActionMenuPluginRefactor"
 import {
   useEditorInputStyles,
   useEditorPlaceholderStyles,
 } from "./useEditorStyles"
+import TablePlugin from "./plugins/CustomTablePlugin"
 import "./editor.css"
+import TreeViewPlugin from "./plugins/TreeViewPlugin"
 
 const usePaperStyles = makeStyles({
   root: {
@@ -45,7 +47,7 @@ const initialConfig = {
     QuoteNode,
     ListItemNode,
     ListNode,
-    TableNode,
+    CustomTableNode,
     TableCellNode,
     TableRowNode,
   ],
@@ -81,6 +83,7 @@ const EditorV8 = () => {
           </Paper>
         </Grid>
       </Grid>
+      <TreeViewPlugin />
     </LexicalComposer>
   )
 }
