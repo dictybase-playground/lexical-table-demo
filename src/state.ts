@@ -1,3 +1,5 @@
 import { atom } from "jotai"
 
-export const dialogOpenAtom = atom(false)
+const dialogOpenAtom = atom(false)
+
+export default dialogOpenAtom
