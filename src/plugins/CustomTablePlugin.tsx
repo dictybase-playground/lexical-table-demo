@@ -29,7 +29,7 @@ import {
   createCommand,
 } from "lexical"
 import { useEffect } from "react"
-import { pipe, F } from "@mobily/ts-belt"
+import { pipe } from "@mobily/ts-belt"
 import CustomTableNode from "../nodes/CustomTableNode"
 
 export const INSERT_CUSTOM_TABLE_COMMAND = createCommand<{
@@ -38,23 +38,16 @@ export const INSERT_CUSTOM_TABLE_COMMAND = createCommand<{
   width: number
 }>()
 
-const createRows = (rows: number) =>
-  [...new Array(rows)].map(() => $createTableRowNode())
-
 const createParagraphWithTextNode = () =>
-  pipe(
-    $createParagraphNode(),
-    F.tap((p) => p.append($createTextNode())),
-  )
+  $createParagraphNode().append($createTextNode())
 
-const createCell = () =>
-  pipe(
-    $createTableCellNode(TableCellHeaderStates.NO_STATUS),
-    F.tap((c) => c.append(createParagraphWithTextNode())),
+const createCellWithParagraphNode = () =>
+  $createTableCellNode(TableCellHeaderStates.NO_STATUS).append(
+    createParagraphWithTextNode(),
   )
 
 const createCellArray = (cells: number) =>
-  [...new Array(cells)].map(() => createCell())
+  [...new Array(cells)].map(() => createCellWithParagraphNode())
 
 const cellsToAppend = (cells: number) => (row: TableRowNode) => {
   createCellArray(cells).forEach((c) => {
@@ -62,7 +55,10 @@ const cellsToAppend = (cells: number) => (row: TableRowNode) => {
   })
 }
 
-const appendRows = (table: TableNode, rowArray: TableRowNode[]) => {
+const createRows = (rows: number) =>
+  [...new Array(rows)].map(() => $createTableRowNode())
+
+const appendRowsToTable = (table: TableNode) => (rowArray: TableRowNode[]) => {
   rowArray.forEach((r) => table.append(r))
   return table
 }
@@ -75,27 +71,22 @@ function $createCustomTableNodeWithDimensions(
   const tableNode = new CustomTableNode(width)
 
   const appendCells = cellsToAppend(columnCount)
-
+  const appendRows = appendRowsToTable(tableNode)
   const populateRows = (rows: TableRowNode[]) => {
     rows.forEach((r) => appendCells(r))
     return rows
   }
 
-  const rows = pipe(rowCount, createRows, populateRows)
-  appendRows(tableNode, rows)
-
-  return tableNode
+  return pipe(rowCount, createRows, populateRows, appendRows)
 }
 
 const TablePlugin = () => {
   const [editor] = useLexicalComposerContext()
   useEffect(() => {
     if (!editor.hasNodes([CustomTableNode, TableCellNode, TableRowNode])) {
-      {
-        throw Error(
-          `TablePlugin: TableNode, TableCellNode or TableRowNode not registered on editor`,
-        )
-      }
+      throw new Error(
+        `TablePlugin: TableNode, TableCellNode or TableRowNode not registered on editor`,
+      )
     }
 
     return editor.registerCommand(
@@ -107,7 +98,7 @@ const TablePlugin = () => {
           return true
         }
 
-        const focus = selection.focus
+        const { focus } = selection
         const focusNode = focus.getNode()
 
         if (!focusNode) return true

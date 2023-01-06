@@ -10,7 +10,7 @@ import {
   Grid,
 } from "@material-ui/core"
 import { useSetAtom } from "jotai"
-import { dialogOpenAtom } from "./state"
+import dialogOpenAtom from "./state"
 import { INSERT_CUSTOM_TABLE_COMMAND } from "./plugins/CustomTablePlugin"
 
 const calculateWidth = (columns: number) => Math.log(columns) * 500
@@ -33,7 +33,7 @@ const TableDialogContents = () => {
     editor.dispatchCommand(INSERT_CUSTOM_TABLE_COMMAND, {
       rows,
       columns,
-      width: calculateWidth(Number.parseInt(columns)),
+      width: calculateWidth(Number.parseInt(columns, 10)),
     })
     setIsDialogOpen(false)
   }
