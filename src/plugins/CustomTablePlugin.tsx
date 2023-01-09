@@ -16,6 +16,7 @@ import {
   TableCellHeaderStates,
   applyTableHandlers,
   HTMLTableElementWithWithTableSelectionState,
+  TableSelection,
 } from "@lexical/table"
 import {
   $getSelection,
@@ -27,9 +28,10 @@ import {
   $getNodeByKey,
   COMMAND_PRIORITY_EDITOR,
   createCommand,
+  NodeMutation,
 } from "lexical"
 import { useEffect } from "react"
-import { pipe } from "@mobily/ts-belt"
+import { pipe, A, G } from "@mobily/ts-belt"
 import CustomTableNode from "../nodes/CustomTableNode"
 
 export const INSERT_CUSTOM_TABLE_COMMAND = createCommand<{
@@ -38,37 +40,37 @@ export const INSERT_CUSTOM_TABLE_COMMAND = createCommand<{
   width: number
 }>()
 
-const createParagraphWithTextNode = () =>
-  $createParagraphNode().append($createTextNode())
-
-const createCellWithParagraphNode = () =>
-  $createTableCellNode(TableCellHeaderStates.NO_STATUS).append(
-    createParagraphWithTextNode(),
-  )
-
-const createCellAppender = (cells: number) => (row: TableRowNode) => {
-  ;[...new Array(cells)].forEach(() =>
-    row.append(createCellWithParagraphNode()),
-  )
-}
-
-const createRows = (rows: number) =>
-  [...new Array(rows)].map(() => $createTableRowNode())
-
 function $createCustomTableNodeWithDimensions(
   rowCount: number,
   columnCount: number,
   width: number,
 ) {
-  const tableNode = new CustomTableNode(width)
+  const createParagraphWithTextNode = () =>
+    $createParagraphNode().append($createTextNode())
 
-  const appendCells = createCellAppender(columnCount)
-  const populateRows = (rows: TableRowNode[]) => {
-    rows.forEach((r) => appendCells(r))
-    return rows
+  const createCellWithParagraphNode = () =>
+    $createTableCellNode(TableCellHeaderStates.NO_STATUS).append(
+      createParagraphWithTextNode(),
+    )
+
+  const cellsToAppend = (cells: number) => (row: TableRowNode) => {
+    Array.from({ length: cells }).forEach(() =>
+      row.append(createCellWithParagraphNode()),
+    )
   }
-  const rowsWithCells = pipe(rowCount, createRows, populateRows)
-  return rowsWithCells.reduce((t, r) => t.append(r), tableNode)
+
+  const createRows = (rows: number) =>
+    Array.from({ length: rows }).map(() => $createTableRowNode())
+
+  const rowToAppend = (table: TableNode) => (row: TableRowNode) => {
+    table.append(row)
+  }
+
+  const tableNode = new CustomTableNode(width)
+  const cellFunction = cellsToAppend(columnCount)
+  const rowFunction = rowToAppend(tableNode)
+  pipe(rowCount, createRows, A.tap(cellFunction), A.tap(rowFunction))
+  return tableNode
 }
 
 const TablePlugin = () => {
@@ -133,7 +135,7 @@ const TablePlugin = () => {
   }, [editor])
 
   useEffect(() => {
-    const tableSelections = new Map()
+    const tableSelections = new Map<string, TableSelection>()
 
     const initializeTableNode = (tableNode: TableNode) => {
       const nodeKey = tableNode.getKey()
@@ -164,28 +166,44 @@ const TablePlugin = () => {
     const unregisterMutationListener = editor.registerMutationListener(
       CustomTableNode,
       (nodeMutations) => {
-        const created = [...nodeMutations].filter(
-          ([, mutation]) => mutation === "created",
-        )
-        const createdNodes = created.map(([nodeKey]) =>
-          editor.getEditorState().read(() => $getNodeByKey(nodeKey)),
-        )
-        const tableNodes = createdNodes.filter((node): node is TableNode =>
-          $isTableNode(node),
-        )
-        tableNodes.forEach((tableNode) => initializeTableNode(tableNode))
+        const isCreated = ([, mutation]: [string, NodeMutation]) =>
+          mutation === "created"
+        const getNode = (nodeKey: string) =>
+          editor.getEditorState().read(() => $getNodeByKey(nodeKey))
 
-        const destroyed = [...nodeMutations].filter(
-          ([, mutation]) => mutation === "destroyed",
+        pipe(
+          [...nodeMutations],
+          A.filter(isCreated),
+          A.map(A.head),
+          A.filter(G.isString),
+          A.map(getNode),
+          A.filter($isTableNode),
+          A.tap(initializeTableNode),
         )
-        destroyed.forEach(([nodeKey]) => {
-          const tableSelection = tableSelections.get(nodeKey)
 
-          if (tableSelection) {
-            tableSelection.removeListeners()
-            tableSelections.delete(nodeKey)
-          }
-        })
+        const isDestroyed = ([, mutation]: [string, NodeMutation]) =>
+          mutation === "destroyed"
+
+        const getTableSelection = ([nodeKey]: [string, NodeMutation]): [
+          string,
+          TableSelection | undefined,
+        ] => [nodeKey, tableSelections.get(nodeKey)]
+
+        const cleanUp = ([nodeKey, tableSelection]: [
+          string,
+          TableSelection | undefined,
+        ]) => {
+          if (!tableSelection) return
+          tableSelection.removeListeners()
+          tableSelections.delete(nodeKey)
+        }
+
+        pipe(
+          [...nodeMutations],
+          A.filter(isDestroyed),
+          A.map(getTableSelection),
+          A.tap(cleanUp),
+        )
       },
     )
     return () => {
