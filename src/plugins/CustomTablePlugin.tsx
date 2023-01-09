@@ -46,16 +46,14 @@ const createCellWithParagraphNode = () =>
     createParagraphWithTextNode(),
   )
 
-const createCellArray = (cells: number) =>
-  [...new Array(cells)].map(() => createCellWithParagraphNode())
-
-const cellsToAppend = (cells: number) => (row: TableRowNode) => {
-  createCellArray(cells).forEach((c) => {
-    row.append(c)
-  })
+// combine createCellArray and cellsToAppend use reduce / flatten ?
+// replace forEach with map?
+const createCellAppender = (cells: number) => (row: TableRowNode) => {
+  ;[...new Array(cells)].map(() => row.append(createCellWithParagraphNode()))
 }
 
 const createRows = (rows: number) =>
+  // make the cells in here?
   [...new Array(rows)].map(() => $createTableRowNode())
 
 const appendRowsToTable = (table: TableNode) => (rowArray: TableRowNode[]) => {
@@ -70,13 +68,17 @@ function $createCustomTableNodeWithDimensions(
 ) {
   const tableNode = new CustomTableNode(width)
 
-  const appendCells = cellsToAppend(columnCount)
+  const appendCells = createCellAppender(columnCount)
   const appendRows = appendRowsToTable(tableNode)
   const populateRows = (rows: TableRowNode[]) => {
+    // .map here instead?
+    // inner pipe
+    // get array of cells for each row,
+    // then add to that row
     rows.forEach((r) => appendCells(r))
     return rows
   }
-
+  // branching pipe ?
   return pipe(rowCount, createRows, populateRows, appendRows)
 }
 
@@ -117,7 +119,11 @@ const TablePlugin = () => {
 
         if ($isRootOrShadowRoot(focusNode)) {
           const target = focusNode.getChildAtIndex(focus.offset)
-          target ? target.insertBefore(tableNode) : focusNode.append(tableNode)
+          if (target) {
+            target.insertBefore(tableNode)
+          } else {
+            focusNode.append(tableNode)
+          }
           tableNode.insertBefore($createParagraphNode())
         } else {
           const topLevelNode = focusNode.getTopLevelElementOrThrow()
@@ -160,44 +166,45 @@ const TablePlugin = () => {
     editor.getEditorState().read(() => {
       const tableNodes = $nodesOfType(TableNode)
 
-      for (const tableNode of tableNodes) {
-        if ($isTableNode(tableNode)) {
-          initializeTableNode(tableNode)
-        }
-      }
+      tableNodes.map((tableNode) => {
+        initializeTableNode(tableNode)
+        return tableNode
+      })
     })
+
     const unregisterMutationListener = editor.registerMutationListener(
       CustomTableNode,
       (nodeMutations) => {
-        for (const [nodeKey, mutation] of nodeMutations) {
-          if (mutation === "created") {
-            editor.getEditorState().read(() => {
-              const tableNode = $getNodeByKey(nodeKey)
+        const created = [...nodeMutations].filter(
+          ([, mutation]) => mutation === "created",
+        )
+        const createdNodes = created.map(([nodeKey]) =>
+          editor.getEditorState().read(() => $getNodeByKey(nodeKey)),
+        )
+        const tableNodes = createdNodes.filter((node): node is TableNode =>
+          $isTableNode(node),
+        )
+        tableNodes.forEach((tableNode) => initializeTableNode(tableNode))
 
-              if ($isTableNode(tableNode)) {
-                initializeTableNode(tableNode)
-              }
-            })
+        const destroyed = [...nodeMutations].filter(
+          ([, mutation]) => mutation === "destroyed",
+        )
+        destroyed.forEach(([nodeKey]) => {
+          const tableSelection = tableSelections.get(nodeKey)
+
+          if (tableSelection) {
+            tableSelection.removeListeners()
+            tableSelections.delete(nodeKey)
           }
-
-          if (mutation === "destroyed") {
-            const tableSelection = tableSelections.get(nodeKey)
-
-            if (tableSelection) {
-              tableSelection.removeListeners()
-              tableSelections.delete(nodeKey)
-            }
-          }
-        }
+        })
       },
     )
     return () => {
       unregisterMutationListener() // Hook might be called multiple times so cleaning up tables listeners as well,
       // as it'll be reinitialized during recurring call
-
-      for (const [, tableSelection] of tableSelections) {
+      ;[...tableSelections].forEach(([, tableSelection]) => {
         tableSelection.removeListeners()
-      }
+      })
     }
   }, [editor])
   return null

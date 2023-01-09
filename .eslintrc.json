@@ -72,6 +72,7 @@
     "unicorn/no-array-for-each": "off",
     "unicorn/no-for-of": "off",
     "unicorn/no-useless-undefined": "off",
+    "unicorn/no-null": "off",
     "unicorn/filename-case": [
       "error",
       {
