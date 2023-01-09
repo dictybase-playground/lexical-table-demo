@@ -41,7 +41,10 @@
     "@typescript-eslint/no-shadow": ["error"],
     "@typescript-eslint/no-unused-vars": [
       "error",
-      { "args": "after-used", "ignoreRestSiblings": false }
+      {
+        "args": "after-used",
+        "ignoreRestSiblings": false
+      }
     ],
     "react/jsx-filename-extension": [
       "warn",
@@ -85,8 +88,11 @@
     "i18n-text/no-en": "off",
     "eslint-comments/no-use": [
       "error",
-      { "allow": ["eslint-disable", "eslint-disable-next-line"] }
+      {
+        "allow": ["eslint-disable", "eslint-disable-next-line"]
+      }
     ],
-    "unicorn/no-new-array": "off"
+    "unicorn/no-new-array": "off",
+    "unicorn/no-array-callback-reference": "off"
   }
 }
