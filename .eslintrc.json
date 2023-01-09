@@ -69,6 +69,8 @@
     ],
     "filenames/match-regex": "off",
     "github/array-foreach": "off",
+    "unicorn/consistent-function-scoping": "off",
+    "unicorn/no-array-callback-reference": "off",
     "unicorn/no-array-for-each": "off",
     "unicorn/no-array-reduce": "off",
     "unicorn/no-for-of": "off",
