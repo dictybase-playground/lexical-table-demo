@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import {
   Divider,
-  Icon,
   IconButton,
   makeStyles,
   Menu,
@@ -30,11 +29,11 @@ type TableMenuButtonProperties = {
 
 const TableMenuButton = ({ anchorElement }: TableMenuButtonProperties) => {
   const [isOpen, setIsOpen] = useState(false)
-  const menuButtonRef = useRef<HTMLButtonElement>(null)
+  const menuButtonReference = useRef<HTMLButtonElement>(null)
   const { root } = useTableMenuButtonStyles()
 
   useEffect(() => {
-    const menuButtonDOM = menuButtonRef.current
+    const menuButtonDOM = menuButtonReference.current
 
     if (!menuButtonDOM) return
 
@@ -54,15 +53,15 @@ const TableMenuButton = ({ anchorElement }: TableMenuButtonProperties) => {
       <IconButton
         size="small"
         onClick={() => setIsOpen(true)}
-        ref={menuButtonRef}
+        ref={menuButtonReference}
         className={root}>
         <KeyboardArrowDownIcon />
       </IconButton>
       <Menu
         open={isOpen}
-        getContentAnchorEl={null}
-        // This needs to be set to null for anchorOrigin.vertical to have affect
-        anchorEl={menuButtonRef.current}
+        // getContentAnchorEl needs to be set to null for anchorOrigin.vertical to have affect
+        getContentAnchorEl={undefined}
+        anchorEl={menuButtonReference.current}
         anchorOrigin={{
           vertical: "top",
           horizontal: "right",
@@ -92,37 +91,39 @@ const TableActionMenuPlugin = () => {
   const [currentTableCellDOM, setCurrentTableCellDOM] =
     useState<HTMLElement | null>(null)
 
-  useEffect(() => {
-    // register a listener for selection command,
-    // if the selection is inside a table cell, get the current DOM element for that cell
-    // and store it in state, which is used by TableMenuButton for positioning
-    return editor.registerCommand(
-      // lexical's demo uses registerUpdateListener, maybe that's the right choice, look into later
-      SELECTION_CHANGE_COMMAND,
-      () => {
-        const selection = $getSelection()
+  useEffect(
+    () =>
+      // register a listener for selection command,
+      // if the selection is inside a table cell, get the current DOM element for that cell
+      // and store it in state, which is used by TableMenuButton for positioning
+      editor.registerCommand(
+        // lexical's demo uses registerUpdateListener, maybe that's the right choice, look into later
+        SELECTION_CHANGE_COMMAND,
+        () => {
+          const selection = $getSelection()
 
-        if (!$isRangeSelection(selection)) return true
-        // lexical also has other non-null checks for other variables, that I don't think are necessary, but I will look closer
-        const tableCellNode = $getTableCellNodeFromLexicalNode(
-          selection.anchor.getNode(),
-        )
+          if (!$isRangeSelection(selection)) return true
+          // lexical also has other non-null checks for other variables, that I don't think are necessary, but I will look closer
+          const tableCellNode = $getTableCellNodeFromLexicalNode(
+            selection.anchor.getNode(),
+          )
 
-        if (!tableCellNode) {
-          setCurrentTableCellDOM(null)
+          if (!tableCellNode) {
+            setCurrentTableCellDOM(null)
+            return true
+          }
+
+          const tableCellParentNodeDOM = editor.getElementByKey(
+            tableCellNode.getKey(),
+          )
+
+          setCurrentTableCellDOM(tableCellParentNodeDOM)
           return true
-        }
-
-        const tableCellParentNodeDOM = editor.getElementByKey(
-          tableCellNode.getKey(),
-        )
-
-        setCurrentTableCellDOM(tableCellParentNodeDOM)
-        return true
-      },
-      1,
-    )
-  }, [editor])
+        },
+        1,
+      ),
+    [editor],
+  )
 
   if (currentTableCellDOM)
     return createPortal(

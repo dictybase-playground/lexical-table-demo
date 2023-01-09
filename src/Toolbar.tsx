@@ -1,6 +1,6 @@
 import InsertTableButton from "./InsertTableButton"
 import ToolBar from "@material-ui/core/Toolbar"
-import { makeStyles } from "@material-ui/core"
+import { Paper, makeStyles } from "@material-ui/core"
 
 const useToolbarStyles = makeStyles({
   root: {

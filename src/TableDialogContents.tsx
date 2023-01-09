@@ -1,5 +1,4 @@
 import { useState, ChangeEvent } from "react"
-import { INSERT_TABLE_COMMAND } from "@lexical/table"
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext"
 import {
   Button,
@@ -11,7 +10,10 @@ import {
   Grid,
 } from "@material-ui/core"
 import { useSetAtom } from "jotai"
-import { dialogOpenAtom } from "./state"
+import dialogOpenAtom from "./state"
+import { INSERT_CUSTOM_TABLE_COMMAND } from "./plugins/CustomTablePlugin"
+
+const calculateWidth = (columns: number) => Math.log(columns) * 500
 
 const TableDialogContents = () => {
   const setIsDialogOpen = useSetAtom(dialogOpenAtom)
@@ -28,9 +30,10 @@ const TableDialogContents = () => {
   }
 
   const handleConfirm = () => {
-    editor.dispatchCommand(INSERT_TABLE_COMMAND, {
+    editor.dispatchCommand(INSERT_CUSTOM_TABLE_COMMAND, {
       rows,
       columns,
+      width: calculateWidth(Number.parseInt(columns, 10)),
     })
     setIsDialogOpen(false)
   }
