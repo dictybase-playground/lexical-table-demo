@@ -180,7 +180,6 @@ const TablePlugin = () => {
           A.filter($isTableNode),
           A.tap(initializeTableNode),
         )
-
         const isDestroyed = ([, mutation]: [string, NodeMutation]) =>
           mutation === "destroyed"
 
@@ -209,7 +208,7 @@ const TablePlugin = () => {
     return () => {
       unregisterMutationListener() // Hook might be called multiple times so cleaning up tables listeners as well,
       // as it'll be reinitialized during recurring call
-      ;[...tableSelections].forEach(([, tableSelection]) => {
+      A.tap([...tableSelections], ([, tableSelection]) => {
         tableSelection.removeListeners()
       })
     }
