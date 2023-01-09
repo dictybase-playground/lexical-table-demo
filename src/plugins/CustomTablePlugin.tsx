@@ -46,17 +46,19 @@ const createCellWithParagraphNode = () =>
     createParagraphWithTextNode(),
   )
 
-// combine createCellArray and cellsToAppend use reduce / flatten ?
-// replace forEach with map?
+// use reduce / flatten ?
+// use .map?
 const createCellAppender = (cells: number) => (row: TableRowNode) => {
-  ;[...new Array(cells)].map(() => row.append(createCellWithParagraphNode()))
+  ;[...new Array(cells)].forEach(() =>
+    row.append(createCellWithParagraphNode()),
+  )
 }
 
 const createRows = (rows: number) =>
   // make the cells in here?
   [...new Array(rows)].map(() => $createTableRowNode())
 
-const appendRowsToTable = (table: TableNode) => (rowArray: TableRowNode[]) => {
+const createRowAppender = (table: TableNode) => (rowArray: TableRowNode[]) => {
   rowArray.forEach((r) => table.append(r))
   return table
 }
@@ -69,7 +71,7 @@ function $createCustomTableNodeWithDimensions(
   const tableNode = new CustomTableNode(width)
 
   const appendCells = createCellAppender(columnCount)
-  const appendRows = appendRowsToTable(tableNode)
+  const appendRows = createRowAppender(tableNode)
   const populateRows = (rows: TableRowNode[]) => {
     // .map here instead?
     // inner pipe
