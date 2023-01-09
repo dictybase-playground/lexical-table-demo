@@ -2,8 +2,10 @@ import { TableNode } from "@lexical/table"
 import { addClassNamesToElement } from "@lexical/utils"
 import { NodeKey, EditorConfig } from "lexical"
 
+// @ts-ignore
 class CustomTableNode extends TableNode {
-  static getType(): "table" {
+  // how exactly is getType being used? how does it's type name affect deserialization?
+  static getType() {
     return "table"
   }
 
