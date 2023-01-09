@@ -41,10 +41,13 @@ const TableMenuButton = ({ anchorElement }: TableMenuButtonProperties) => {
     const anchorElementRectangle = anchorElement.getBoundingClientRect()
 
     menuButtonDOM.style.left = `${
-      anchorElementRectangle.right - menuButtonRectangle.width
+      anchorElementRectangle.right - menuButtonRectangle.width + window.scrollX
     }px`
     menuButtonDOM.style.top = `${
-      anchorElementRectangle.top + 10 - menuButtonRectangle.height / 2
+      anchorElementRectangle.top +
+      10 -
+      menuButtonRectangle.height / 2 +
+      window.scrollY
     }px`
   }, [anchorElement])
 

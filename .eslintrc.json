@@ -70,6 +70,7 @@
     "filenames/match-regex": "off",
     "github/array-foreach": "off",
     "unicorn/no-array-for-each": "off",
+    "unicorn/no-array-reduce": "off",
     "unicorn/no-for-of": "off",
     "unicorn/no-useless-undefined": "off",
     "unicorn/no-null": "off",

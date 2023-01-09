@@ -46,8 +46,6 @@ const createCellWithParagraphNode = () =>
     createParagraphWithTextNode(),
   )
 
-// use reduce / flatten ?
-// use .map?
 const createCellAppender = (cells: number) => (row: TableRowNode) => {
   ;[...new Array(cells)].forEach(() =>
     row.append(createCellWithParagraphNode()),
@@ -55,13 +53,7 @@ const createCellAppender = (cells: number) => (row: TableRowNode) => {
 }
 
 const createRows = (rows: number) =>
-  // make the cells in here?
   [...new Array(rows)].map(() => $createTableRowNode())
-
-const createRowAppender = (table: TableNode) => (rowArray: TableRowNode[]) => {
-  rowArray.forEach((r) => table.append(r))
-  return table
-}
 
 function $createCustomTableNodeWithDimensions(
   rowCount: number,
@@ -71,17 +63,12 @@ function $createCustomTableNodeWithDimensions(
   const tableNode = new CustomTableNode(width)
 
   const appendCells = createCellAppender(columnCount)
-  const appendRows = createRowAppender(tableNode)
   const populateRows = (rows: TableRowNode[]) => {
-    // .map here instead?
-    // inner pipe
-    // get array of cells for each row,
-    // then add to that row
     rows.forEach((r) => appendCells(r))
     return rows
   }
-  // branching pipe ?
-  return pipe(rowCount, createRows, populateRows, appendRows)
+  const rowsWithCells = pipe(rowCount, createRows, populateRows)
+  return rowsWithCells.reduce((t, r) => t.append(r), tableNode)
 }
 
 const TablePlugin = () => {
