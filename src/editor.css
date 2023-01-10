@@ -33,57 +33,9 @@
   margin-bottom: 0;
 }
 
-/* 
- In fixed table layout, the overall width is determined by the greater of two values: the width property of the table element and the sum of the widths of the columns
- Since I set the width of the columns based on the number of children, the width property effectively serves as a minimum width for the table. Having a width property on 
- table element is necessary for fixed-table layout
-*/
 .editor-table {
-  /* width: 100px; */
   table-layout: fixed;
 }
-
-/* First line selects a th element that is the first child AND the nth-last-child, which is only true if there are n total siblings, i.e. n columns */
-/* Second line selects every th AFTER the first child with n siblings. In other words it selects the rest of the siblings */
-
-/* th:first-child:nth-last-child(2),
-th:first-child:nth-last-child(2) ~ th {
-  width: 250px;
-}
-
-th:first-child:nth-last-child(3),
-th:first-child:nth-last-child(3) ~ th {
-  width: 175px;
-}
-
-th:first-child:nth-last-child(4),
-th:first-child:nth-last-child(4) ~ th {
-  width: 150px;
-}
-
-th:first-child:nth-last-child(5),
-th:first-child:nth-last-child(5) ~ th {
-  width: 120px;
-}
-
-th:first-child:nth-last-child(6),
-th:first-child:nth-last-child(6) ~ th {
-  width: 100px;
-}
-
-th:first-child:nth-last-child(7),
-th:first-child:nth-last-child(7) ~ th {
-  width: 90px;
-}
-
-th:first-child:nth-last-child(8),
-th:first-child:nth-last-child(8) ~ th {
-  width: 85px;
-} */
-/* 
-th {
-  width: 50px;
-} */
 
 .editor-tablecell-head {
   font-weight: normal;
