@@ -1,6 +1,7 @@
 import { LexicalComposer } from "@lexical/react/LexicalComposer"
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin"
 import { ContentEditable } from "@lexical/react/LexicalContentEditable"
+import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary"
 import { TableCellNode, TableRowNode } from "@lexical/table"
 import { ListItemNode, ListNode } from "@lexical/list"
 import { HeadingNode, QuoteNode } from "@lexical/rich-text"
@@ -14,7 +15,6 @@ import {
 } from "./useEditorStyles"
 import TablePlugin from "./plugins/CustomTablePlugin"
 import "./editor.css"
-import TreeViewPlugin from "./plugins/TreeViewPlugin"
 
 const usePaperStyles = makeStyles({
   root: {
@@ -70,7 +70,7 @@ const EditorV8 = () => {
         <Grid item>
           <Paper className={paperClasses.root}>
             <RichTextPlugin
-              // latest version of lexical requires error boundary prop
+              ErrorBoundary={LexicalErrorBoundary}
               contentEditable={
                 <ContentEditable className={inputClasses.root} />
               }
@@ -83,7 +83,6 @@ const EditorV8 = () => {
           </Paper>
         </Grid>
       </Grid>
-      <TreeViewPlugin />
     </LexicalComposer>
   )
 }
