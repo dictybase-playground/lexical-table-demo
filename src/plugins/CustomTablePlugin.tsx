@@ -31,7 +31,7 @@ import {
   NodeMutation,
 } from "lexical"
 import { useEffect } from "react"
-import { pipe, A, G } from "@mobily/ts-belt"
+import { pipe, A, F, G } from "@mobily/ts-belt"
 import CustomTableNode from "../nodes/CustomTableNode"
 
 export const INSERT_CUSTOM_TABLE_COMMAND = createCommand<{
@@ -53,10 +53,29 @@ function $createCustomTableNodeWithDimensions(
       createParagraphWithTextNode(),
     )
 
-  const cellsToAppend = (cells: number) => (row: TableRowNode) => {
+  const createHeaderCellWithParagraphNode = () =>
+    $createTableCellNode(TableCellHeaderStates.ROW).append(
+      createParagraphWithTextNode(),
+    )
+
+  const bodyCellsToAppend = (cells: number) => (row: TableRowNode) => {
     Array.from({ length: cells }).forEach(() =>
       row.append(createCellWithParagraphNode()),
     )
+  }
+
+  const headerCellsToAppend = (cells: number) => (row: TableRowNode) => {
+    Array.from({ length: cells }).forEach(() =>
+      row.append(createHeaderCellWithParagraphNode()),
+    )
+  }
+
+  const cellsToAppend = (cells: number) => (rows: TableRowNode[]) => {
+    if (rows.length === 0) return
+    const headerCellFunction = headerCellsToAppend(cells)
+    const bodyCellFunction = bodyCellsToAppend(cells)
+    headerCellFunction(rows[0])
+    pipe(rows, A.tailOrEmpty, A.tap(bodyCellFunction))
   }
 
   const createRows = (rows: number) =>
@@ -69,7 +88,7 @@ function $createCustomTableNodeWithDimensions(
   const tableNode = new CustomTableNode(width)
   const cellFunction = cellsToAppend(columnCount)
   const rowFunction = rowToAppend(tableNode)
-  pipe(rowCount, createRows, A.tap(cellFunction), A.tap(rowFunction))
+  pipe(rowCount, createRows, F.tap(cellFunction), A.tap(rowFunction))
   return tableNode
 }
 
